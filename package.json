@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@julep/sdk": "^1.71.5",
+    "@types/axios": "^0.14.4",
+    "@types/express": "^5.0.1",
+    "@types/passport": "^1.0.17",
+    "axios": "^1.8.4",
+    "express": "^5.1.0",
+    "passport": "^0.7.0"
+  }
+}
