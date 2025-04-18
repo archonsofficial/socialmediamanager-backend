@@ -1,11 +1,29 @@
 {
+  "name": "social-media-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -b",
+    "preview": "node dist/index.js",
+    "test": "jest"
+  },
+  "author": "Aditya Vardhan Singh",
+  "license": "ISC",
   "dependencies": {
     "@julep/sdk": "^1.71.5",
     "@types/axios": "^0.14.4",
     "@types/express": "^5.0.1",
     "@types/passport": "^1.0.17",
     "axios": "^1.8.4",
+    "cors": "^2.8.5",
     "express": "^5.1.0",
     "passport": "^0.7.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/node": "^22.14.1"
   }
 }
