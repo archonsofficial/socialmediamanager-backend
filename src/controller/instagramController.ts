@@ -36,6 +36,7 @@ export const instaAuth = async (req: Request, res: Response) => {
     },
   });
   const scope = "instagram_business_basic,instagram_business_content_publish";
+  const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURI(redirectUri)}&scope=${scope}&response_type=code`;
   const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURI(
     redirectUri
   )}&scope=${scope}&response_type=code`;
