@@ -4,10 +4,6 @@ import qs from "qs";
 const appId = "657576830393437"; // Replace with your Instagram App ID
 const appSecret = "152e8a450437f2af661073cf1233a978"; // Replace with your Instagram App Secret
 const redirectUri = "https://api.prism2025.tech/instagram/auth/callback"; // Replace with your redirect URI
-<<<<<<< HEAD
-
-=======
->>>>>>> b3c0e52 (Added Auth, Database, Error handling, Validations)
 // Step 1: Redirect user to Instagram OAuth
 export const instaAuth = async (req: Request, res: Response) => {
   const {
@@ -22,27 +18,12 @@ export const instaAuth = async (req: Request, res: Response) => {
       instaPref,
     },
   });
-export const instaAuth = async (req: Request, res: Response) => {
-  const {
-    user: { userId },
-    instaPref,
-  } = req as any;
-  await prisma.user.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      instaPref,
-    },
-  });
   const scope = "instagram_business_basic,instagram_business_content_publish";
-  const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURI(redirectUri)}&scope=${scope}&response_type=code`;
   const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURI(
     redirectUri
   )}&scope=${scope}&response_type=code`;
   res.redirect(authUrl);
 };
-
 // Step 2: Handle OAuth callback and exchange code for access token
 export const instaCallback = async (req: Request, res: Response) => {
   const code = req.query.code as string;
@@ -53,7 +34,6 @@ export const instaCallback = async (req: Request, res: Response) => {
   }
 
   try {
-<<<<<<< HEAD
     const tokenResponse = await axios.post(
       `https://api.instagram.com/oauth/access_token`,
       qs.stringify({
@@ -63,16 +43,8 @@ export const instaCallback = async (req: Request, res: Response) => {
         redirect_uri: redirectUri,
         code,
       }),
-=======
-    const tokenResponse = await axios.get(
-      `https://graph.facebook.com/v19.0/oauth/access_token`,
->>>>>>> b3c0e52 (Added Auth, Database, Error handling, Validations)
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      },
     );
+
     const { access_token, user_id } = tokenResponse.data;
     // console.log("token response is -", tokenResponse);
     // const accessToken = tokenResponse.data.access_token;
@@ -94,8 +66,6 @@ export const instaCallback = async (req: Request, res: Response) => {
     });
 
     res.json({
-      message: "Instagram authorization successfull",
-      long_access_token,
       message: "Instagram authorization successful",
       long_access_token,
       access_token,
