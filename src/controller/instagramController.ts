@@ -1,19 +1,20 @@
 import axios from "axios";
-import { Request, Response } from "express";
-
+import { Request, response, Response } from "express";
+import qs from "qs";
 const appId = "657576830393437"; // Replace with your Instagram App ID
 const appSecret = "152e8a450437f2af661073cf1233a978"; // Replace with your Instagram App Secret
 const redirectUri = "https://api.prism2025.tech/instagram/auth/callback"; // Replace with your redirect URI
+
 // Step 1: Redirect user to Instagram OAuth
 export const instaAuth = (req: Request, res: Response) => {
   const scope = "instagram_business_basic,instagram_business_content_publish";
-  const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code`;
+  const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURI(redirectUri)}&scope=${scope}&response_type=code`;
   res.redirect(authUrl);
 };
 
 // Step 2: Handle OAuth callback and exchange code for access token
 export const instaCallback = async (req: Request, res: Response) => {
-  const { code } = req.query;
+  const code = req.query.code as string;
 
   if (!code) {
     res.status(400).json({ error: "Authorization code is missing" });
@@ -21,21 +22,31 @@ export const instaCallback = async (req: Request, res: Response) => {
   }
 
   try {
-    const tokenResponse = await axios.get(
-      `https://graph.facebook.com/v19.0/oauth/access_token`,
+    const tokenResponse = await axios.post(
+      `https://api.instagram.com/oauth/access_token`,
+      qs.stringify({
+        client_id: appId,
+        client_secret: appSecret,
+        grant_type: "authorization_code",
+        redirect_uri: redirectUri,
+        code,
+      }),
       {
-        params: {
-          client_id: appId,
-          client_secret: appSecret,
-          redirect_uri: redirectUri,
-          code,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       }
     );
-
-    const accessToken = tokenResponse.data.access_token;
-    res.json({ accessToken });
+    const { access_token, user_id } = tokenResponse.data;
+    // console.log("token response is -", tokenResponse);
+    // const accessToken = tokenResponse.data.access_token;
+    res.json({
+      message: "Instagram authorization successfull",
+      access_token,
+      user_id,
+    });
   } catch (error) {
+    console.log("Error is - ", error);
     res.status(500).json({ error: "Failed to exchange code for access token" });
   }
 };
