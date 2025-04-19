@@ -4,10 +4,6 @@ import qs from "qs";
 const appId = "657576830393437"; // Replace with your Instagram App ID
 const appSecret = "152e8a450437f2af661073cf1233a978"; // Replace with your Instagram App Secret
 const redirectUri = "https://api.prism2025.tech/instagram/auth/callback"; // Replace with your redirect URI
-<<<<<<< HEAD
-
-=======
->>>>>>> b3c0e52 (Added Auth, Database, Error handling, Validations)
 // Step 1: Redirect user to Instagram OAuth
 export const instaAuth = async (req: Request, res: Response) => {
   const {
@@ -39,7 +35,6 @@ export const instaCallback = async (req: Request, res: Response) => {
   }
 
   try {
-<<<<<<< HEAD
     const tokenResponse = await axios.post(
       `https://api.instagram.com/oauth/access_token`,
       qs.stringify({
@@ -49,10 +44,6 @@ export const instaCallback = async (req: Request, res: Response) => {
         redirect_uri: redirectUri,
         code,
       }),
-=======
-    const tokenResponse = await axios.get(
-      `https://graph.facebook.com/v19.0/oauth/access_token`,
->>>>>>> b3c0e52 (Added Auth, Database, Error handling, Validations)
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
