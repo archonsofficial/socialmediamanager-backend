@@ -11,6 +11,7 @@ import {
 } from "../middlewares/authentication";
 import { NotFoundError, UnauthenticatedError } from "../utils/errors";
 
+dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || "defaulttokensecret";
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 const EMAIL = process.env.EMAIL || "support@prism2025.tech";
@@ -27,14 +28,16 @@ export const register = async (req: Request, res: Response) => {
   });
   const token = generateToken(email, user.id);
 
-  res.cookie("token", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-    path: "/",
-  });
-  res.status(StatusCodes.CREATED).json({ msg: "Registered successfully" });
+  // res.cookie("token", token, {
+  //   httpOnly: true,
+  //   secure: true,
+  //   sameSite: "lax",
+  //   maxAge: 30 * 24 * 60 * 60 * 1000,
+  //   path: "/",
+  // });
+  res
+    .status(StatusCodes.CREATED)
+    .json({ msg: "Registered successfully", token });
 };
 
 export const login = async (req: Request, res: Response) => {
@@ -53,14 +56,14 @@ export const login = async (req: Request, res: Response) => {
   }
 
   const token = generateToken(email, user.id);
-  res.cookie("token", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-    path: "/",
-  });
-  res.status(StatusCodes.OK).json({ msg: "Login successful" });
+  // res.cookie("token", token, {
+  //   httpOnly: true,
+  //   secure: true,
+  //   sameSite: "lax",
+  //   maxAge: 30 * 24 * 60 * 60 * 1000,
+  //   path: "/",
+  // });
+  res.status(StatusCodes.OK).json({ msg: "Login successful", token });
 };
 
 export const requestPasswordReset = async (req: Request, res: Response) => {
@@ -115,7 +118,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 
   const user = await prisma.user.findUnique({
     where: {
-      id: parseInt(id),
+      id,
     },
     select: {
       password: true,

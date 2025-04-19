@@ -55,10 +55,11 @@ export const instaCallback = async (req: Request, res: Response) => {
 export const createPost = async (req: Request, res: Response) => {
   const { accessToken, imageUrl, caption } = req.body;
 
-  if (!accessToken || !imageUrl || !caption) {
+  if (!accessToken || !caption) {
     res.status(400).json({ error: "Missing required fields" });
     return;
   }
+  console.log("Create post controller hit");
 
   try {
     // Step 3.1: Get Instagram user ID
@@ -68,8 +69,11 @@ export const createPost = async (req: Request, res: Response) => {
         params: { access_token: accessToken },
       }
     );
+    console.log("userResponse = ", userResponse);
 
     const instagramAccountId = userResponse.data.data[0]?.id;
+    console.log("instagramAccountId = ", instagramAccountId);
+
 
     if (!instagramAccountId) {
       res.status(400).json({ error: "Instagram account not found" });
