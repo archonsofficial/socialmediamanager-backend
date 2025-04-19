@@ -93,23 +93,6 @@ export const instaCallback = async (req: Request, res: Response) => {
       },
     });
 
-    const longtoken = await axios.get(
-      "https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${appSecret}&access_token=${access_token}"
-    );
-    const long_access_token = longtoken.data.access_token;
-
-    // Save long access token to database
-    const {
-      user: { userId },
-    } = req as any;
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        instaAccessToken: long_access_token,
-        instaUserId: user_id
-      },
-    });
-
     res.json({
       message: "Instagram authorization successfull",
       long_access_token,
@@ -555,7 +538,7 @@ export const createPost = async (req: Request, res: Response) => {
 
     // Step 2: Create a container (media object)
     const mediaResponse = await axios.post(
-      `https://graph.instagram.com/v22.0/${instagramUserId}/media`,
+      `https://graph.instagram.com/v22.0/${instagramAccountId}/media`,
       null,
       {
         params: {
@@ -624,7 +607,7 @@ export const createPost = async (req: Request, res: Response) => {
 
     // Step 4: Publish the container
     const publishResponse = await axios.post(
-      `https://graph.instagram.com/v22.0/${instagramUserId}/media_publish`,
+      `https://graph.instagram.com/v22.0/${instagramAccountId}/media_publish`,
       null,
       {
         params: {
