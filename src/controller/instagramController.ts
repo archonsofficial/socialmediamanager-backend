@@ -293,9 +293,10 @@ export const createPost = async (req: Request, res: Response) => {
       "Error creating Instagram post:",
       error.response?.data || error.message,
     );
+    console.log("error is - ", error);
     res.status(500).json({
       error: "Failed to create Instagram post",
-      details: error.response?.data || error.message,
+      details: error.response?.data,
     });
     return;
   }
