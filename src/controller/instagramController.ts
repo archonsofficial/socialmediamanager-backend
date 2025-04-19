@@ -103,6 +103,7 @@ export const instaCallback = async (req: Request, res: Response) => {
     res.json({
       message: "Instagram authorization successfull",
       long_access_token,
+      message: "Instagram authorization successful",
       long_access_token,
       access_token,
       user_id,
