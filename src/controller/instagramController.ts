@@ -171,12 +171,15 @@ export const createPost = async (req: Request, res: Response) => {
 
   try {
     // Step 1: Get Instagram user info
-    const userResponse = await axios.get(`https://graph.instagram.com/me`, {
-      params: {
-        access_token: accessToken,
-        fields: "id,username,account_type",
+    const userResponse = await axios.get(
+      `https://graph.instagram.com/v22.0/me`,
+      {
+        params: {
+          access_token: accessToken,
+          fields: "id,username,account_type",
+        },
       },
-    });
+    );
 
     console.log("User response:", userResponse.data);
     const instagramUserId = userResponse.data.id;
@@ -197,7 +200,7 @@ export const createPost = async (req: Request, res: Response) => {
 
     // Step 2: Create a container (media object)
     const mediaResponse = await axios.post(
-      `https://graph.instagram.com/${instagramUserId}/media`,
+      `https://graph.instagram.com/v22.0/${instagramUserId}/media`,
       null,
       {
         params: {
@@ -226,7 +229,7 @@ export const createPost = async (req: Request, res: Response) => {
 
     do {
       const statusResponse = await axios.get(
-        `https://graph.instagram.com/${containerId}`,
+        `https://graph.instagram.com/v22.0/${containerId}`,
         {
           params: {
             fields: "status_code",
@@ -266,7 +269,7 @@ export const createPost = async (req: Request, res: Response) => {
 
     // Step 4: Publish the container
     const publishResponse = await axios.post(
-      `https://graph.instagram.com/${instagramUserId}/media_publish`,
+      `https://graph.instagram.com/v22.0/${instagramUserId}/media_publish`,
       null,
       {
         params: {
