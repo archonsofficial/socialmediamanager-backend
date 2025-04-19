@@ -35,7 +35,6 @@ export const instaCallback = async (req: Request, res: Response) => {
   }
 
   try {
-<<<<<<< HEAD
     const tokenResponse = await axios.post(
       `https://api.instagram.com/oauth/access_token`,
       qs.stringify({
@@ -45,10 +44,6 @@ export const instaCallback = async (req: Request, res: Response) => {
         redirect_uri: redirectUri,
         code,
       }),
-=======
-    const tokenResponse = await axios.get(
-      `https://graph.facebook.com/v19.0/oauth/access_token`,
->>>>>>> b3c0e52 (Added Auth, Database, Error handling, Validations)
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
