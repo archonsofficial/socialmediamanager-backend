@@ -19,9 +19,9 @@ const registerSchema = z.object({
     .string()
     .min(8, { message: "password must be 8 characters long" })
     .max(20, { message: "password can only be 20 characters long" }),
-  instaPref: z.array(z.string()),
-  xPref: z.array(z.string()),
-  fbPref: z.array(z.string()),
+  // instaPref: z.array(z.string()),
+  // xPref: z.array(z.string()),
+  // fbPref: z.array(z.string()),
 });
 
 //********* Middlewares *********//

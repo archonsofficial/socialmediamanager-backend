@@ -6,9 +6,23 @@ const appSecret = "152e8a450437f2af661073cf1233a978"; // Replace with your Insta
 const redirectUri = "https://api.prism2025.tech/instagram/auth/callback"; // Replace with your redirect URI
 
 // Step 1: Redirect user to Instagram OAuth
-export const instaAuth = (req: Request, res: Response) => {
+export const instaAuth = async (req: Request, res: Response) => {
+  const {
+    user: { userId },
+    instaPref,
+  } = req as any;
+  await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      instaPref,
+    },
+  });
   const scope = "instagram_business_basic,instagram_business_content_publish";
-  const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURI(redirectUri)}&scope=${scope}&response_type=code`;
+  const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURI(
+    redirectUri
+  )}&scope=${scope}&response_type=code`;
   res.redirect(authUrl);
 };
 
@@ -40,8 +54,26 @@ export const instaCallback = async (req: Request, res: Response) => {
     const { access_token, user_id } = tokenResponse.data;
     // console.log("token response is -", tokenResponse);
     // const accessToken = tokenResponse.data.access_token;
+    const longtoken = await axios.get(
+      "https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${appSecret}&access_token=${access_token}"
+    );
+    const long_access_token = longtoken.data.access_token;
+
+    // Save long access token to database
+    const {
+      user: { userId },
+    } = req as any;
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        instaAccessToken: long_access_token,
+        instaUserId: user_id
+      },
+    });
+
     res.json({
       message: "Instagram authorization successfull",
+      long_access_token,
       access_token,
       user_id,
     });
@@ -55,7 +87,7 @@ export const instaCallback = async (req: Request, res: Response) => {
 export const createPost = async (req: Request, res: Response) => {
   const { accessToken, imageUrl, caption } = req.body;
 
-  if (!accessToken || !caption) {
+  if (!accessToken || !imageUrl || !caption) {
     res.status(400).json({ error: "Missing required fields" });
     return;
   }
@@ -73,7 +105,6 @@ export const createPost = async (req: Request, res: Response) => {
 
     const instagramAccountId = userResponse.data.data[0]?.id;
     console.log("instagramAccountId = ", instagramAccountId);
-
 
     if (!instagramAccountId) {
       res.status(400).json({ error: "Instagram account not found" });
