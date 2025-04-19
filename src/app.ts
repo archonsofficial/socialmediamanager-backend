@@ -29,8 +29,7 @@ app.use(
 );
 
 app.use("/auth", authRoute);
-app.use("/instagram", 
-  auth, 
+app.use("/instagram",  
   instagramRouter);
 
 app.get("/", (req, res) => {

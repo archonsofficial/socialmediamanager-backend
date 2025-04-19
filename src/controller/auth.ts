@@ -132,7 +132,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 
   await prisma.user.update({
     where: {
-      id: parseInt(id),
+      id: id,
     },
     data: { password: hashedPassword },
   });
