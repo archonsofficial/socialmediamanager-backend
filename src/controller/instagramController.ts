@@ -18,6 +18,19 @@ export const instaAuth = async (req: Request, res: Response) => {
       instaPref,
     },
   });
+export const instaAuth = async (req: Request, res: Response) => {
+  const {
+    user: { userId },
+    instaPref,
+  } = req as any;
+  await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      instaPref,
+    },
+  });
   const scope = "instagram_business_basic,instagram_business_content_publish";
   const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURI(
     redirectUri
@@ -70,8 +83,26 @@ export const instaCallback = async (req: Request, res: Response) => {
       },
     });
 
+    const longtoken = await axios.get(
+      "https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${appSecret}&access_token=${access_token}"
+    );
+    const long_access_token = longtoken.data.access_token;
+
+    // Save long access token to database
+    const {
+      user: { userId },
+    } = req as any;
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        instaAccessToken: long_access_token,
+        instaUserId: user_id
+      },
+    });
+
     res.json({
       message: "Instagram authorization successfull",
+      long_access_token,
       long_access_token,
       access_token,
       user_id,
@@ -483,10 +514,7 @@ export const createPost = async (req: Request, res: Response) => {
   const { accessToken, imageUrl, caption } = req.body;
 
   if (!accessToken || !imageUrl || !caption) {
-    res.status(400).json({
-      error:
-        "Missing required fields: accessToken, imageUrl, and caption are required",
-    });
+    res.status(400).json({ error: "Missing required fields" });
     return;
   }
 
@@ -504,21 +532,13 @@ export const createPost = async (req: Request, res: Response) => {
         },
       },
     );
+    console.log("userResponse = ", userResponse);
 
-    console.log("User response:", userResponse.data);
-    const instagramUserId = userResponse.data.id;
-    const accountType = userResponse.data.account_type;
+    const instagramAccountId = userResponse.data.data[0]?.id;
+    console.log("instagramAccountId = ", instagramAccountId);
 
-    if (!instagramUserId) {
-      res.status(400).json({ error: "Instagram user ID not found" });
-      return;
-    }
-
-    if (accountType !== "BUSINESS" && accountType !== "CREATOR") {
-      res.status(400).json({
-        error:
-          "Instagram account must be Business or Creator type to publish content",
-      });
+    if (!instagramAccountId) {
+      res.status(400).json({ error: "Instagram account not found" });
       return;
     }
 
