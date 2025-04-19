@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Request, response, Response } from "express";
+import { Request, Response } from "express";
 import qs from "qs";
 const appId = "657576830393437"; // Replace with your Instagram App ID
 const appSecret = "152e8a450437f2af661073cf1233a978"; // Replace with your Instagram App Secret
@@ -73,6 +73,8 @@ export const instaCallback = async (req: Request, res: Response) => {
 
     res.json({
       message: "Instagram authorization successfull",
+      long_access_token,
+      message: "Instagram authorization successful",
       long_access_token,
       access_token,
       user_id,
