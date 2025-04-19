@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 
 const appId = "657576830393437"; // Replace with your Instagram App ID
 const appSecret = "152e8a450437f2af661073cf1233a978"; // Replace with your Instagram App Secret
-const redirectUri = "https://api.prism2025.tech/auth/callback"; // Replace with your redirect URI
+const redirectUri = "https://api.prism2025.tech/instagram/auth/callback"; // Replace with your redirect URI
 // Step 1: Redirect user to Instagram OAuth
 export const instaAuth = (req: Request, res: Response) => {
   const scope = "instagram_business_basic,instagram_business_content_publish";
@@ -21,9 +21,8 @@ export const instaCallback = async (req: Request, res: Response) => {
   }
 
   try {
-    const tokenResponse = await axios.post(
+    const tokenResponse = await axios.get(
       `https://graph.facebook.com/v19.0/oauth/access_token`,
-      null,
       {
         params: {
           client_id: appId,
@@ -31,7 +30,7 @@ export const instaCallback = async (req: Request, res: Response) => {
           redirect_uri: redirectUri,
           code,
         },
-      },
+      }
     );
 
     const accessToken = tokenResponse.data.access_token;
@@ -56,7 +55,7 @@ export const createPost = async (req: Request, res: Response) => {
       `https://graph.facebook.com/v19.0/me/accounts`,
       {
         params: { access_token: accessToken },
-      },
+      }
     );
 
     const instagramAccountId = userResponse.data.data[0]?.id;
@@ -76,7 +75,7 @@ export const createPost = async (req: Request, res: Response) => {
           caption,
           access_token: accessToken,
         },
-      },
+      }
     );
 
     const mediaId = mediaResponse.data.id;
@@ -90,7 +89,7 @@ export const createPost = async (req: Request, res: Response) => {
           creation_id: mediaId,
           access_token: accessToken,
         },
-      },
+      }
     );
 
     res.json({ success: true, postId: publishResponse.data.id });
