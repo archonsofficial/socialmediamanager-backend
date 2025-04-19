@@ -9,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "defaultjwtsecret:3";
 const JWT_LIFETIME = process.env.JWT_LIFETIME || "30d";
 const SALT_ROUNDS: number = parseInt(process.env.SALT_ROUNDS || "10");
 
-export const generateToken = (email: string, id: number) => {
+export const generateToken = (email: string, id: string) => {
   return jwt.sign({ email, id }, JWT_SECRET, { expiresIn: "30d" });
 };
 
@@ -44,7 +44,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
   // JWT exchange in request header
 
   const authHeader = req.headers.authorization;
-  if (!authHeader || authHeader.startsWith("Bearer")) {
+  if (!authHeader || !authHeader.startsWith("Bearer")) {
     throw new UnauthenticatedError("Authentication invalid");
   }
   const token = authHeader.split(" ")[1];

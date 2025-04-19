@@ -1,9 +1,8 @@
 import { z } from "zod";
 import { Request, Response, NextFunction } from "express";
-import { StatusCodes } from "http-status-codes";
+// import { StatusCodes } from "http-status-codes";
 import prisma from "../db/connect";
-import { BadRequestError, ConflictError, NotFoundError } from "../utils/errors";;
-
+import { BadRequestError, ConflictError, NotFoundError } from "../utils/errors";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "invalid email" }),
@@ -15,21 +14,14 @@ const loginSchema = z.object({
 
 const registerSchema = z.object({
   name: z.string({ message: "name is required" }),
+  email: z.string().email({ message: "invalid email" }),
   password: z
     .string()
     .min(8, { message: "password must be 8 characters long" })
     .max(20, { message: "password can only be 20 characters long" }),
-  university: z.string(),
-  course: z.enum(["B_Tech", "M_Tech", "BCA", "MCA"], {
-    message: "invalid course",
-  }),
-  department: z.enum(["CSE", "IT", "ECE", "EE", "ME", "CE", "None"], {
-    message: "invalid department",
-  }),
-  year: z.enum(["I", "II", "III", "IV"], { message: "invalid academic year" }),
-  email: z.string().email({ message: "invalid email" }),
-  phone: z.string().length(10, { message: "invalid phone number" }),
-  gender: z.enum(["MALE", "FEMALE", "OTHER"], { message: "invalid gender" }),
+  instaPref: z.array(z.string()),
+  xPref: z.array(z.string()),
+  fbPref: z.array(z.string()),
 });
 
 //********* Middlewares *********//
@@ -85,10 +77,10 @@ export const existingUserValidation = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { email, phone } = req.body;
+  const { email } = req.body;
   const user = await prisma.user.findFirst({
     where: {
-      OR: [{ email }, { phone }],
+      email
     },
   });
 
