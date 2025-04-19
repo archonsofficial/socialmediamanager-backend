@@ -21,9 +21,8 @@ export const instaCallback = async (req: Request, res: Response) => {
   }
 
   try {
-    const tokenResponse = await axios.post(
+    const tokenResponse = await axios.get(
       `https://graph.facebook.com/v19.0/oauth/access_token`,
-      null,
       {
         params: {
           client_id: appId,
