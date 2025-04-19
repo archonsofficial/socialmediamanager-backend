@@ -507,6 +507,7 @@ export const createPost = async (req: Request, res: Response) => {
   }
 
   console.log("Create post controller hit");
+  console.log("input data - ", accessToken, imageUrl, caption);
 
   try {
     // Step 1: Get Instagram user info
