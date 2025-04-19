@@ -3,12 +3,11 @@ import { Request, Response } from "express";
 
 const appId = "657576830393437"; // Replace with your Instagram App ID
 const appSecret = "152e8a450437f2af661073cf1233a978"; // Replace with your Instagram App Secret
-const redirectUri = "http://localhost:5173/auth/callback"; // Replace with your redirect URI
-console.log("testing if its pushed to deployed server");
+const redirectUri = "https://api.prism2025.tech/instagram/auth/callback"; // Replace with your redirect URI
 // Step 1: Redirect user to Instagram OAuth
 export const instaAuth = (req: Request, res: Response) => {
-  const scope = "instagram_basic,instagram_content_publish";
-  const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code`;
+  const scope = "instagram_business_basic,instagram_business_content_publish";
+  const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code`;
   res.redirect(authUrl);
 };
 
@@ -34,10 +33,11 @@ export const instaCallback = async (req: Request, res: Response) => {
         },
       },
     );
-
-    const accessToken = tokenResponse.data.access_token;
-    res.json({ accessToken });
+    // console.log("token response is -", tokenResponse);
+    // const accessToken = tokenResponse.data.access_token;
+    res.json({ tokenResponse });
   } catch (error) {
+    console.log("error is -", error);
     res.status(500).json({ error: "Failed to exchange code for access token" });
   }
 };
