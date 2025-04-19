@@ -34,7 +34,7 @@ export const registerValidation = (
   const parseBody = registerSchema.safeParse(req.body);
   if (!parseBody.success) {
     const errorMessage = parseBody.error.issues
-      .map((issue, index) => {
+      .map((issue: z.ZodIssue, index: number) => {
         if (index == 0) {
           return (
             issue.message[0].slice(0, 1).toUpperCase() + issue.message.slice(1)
