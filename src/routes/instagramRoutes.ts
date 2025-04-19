@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { instaAuth, instaCallback, createPost } from "../controller/instagramController";
+import {
+  instaAuth,
+  instaCallback,
+  createPost,
+} from "../controller/instagramController";
 
 const instagramRouter = Router();
 

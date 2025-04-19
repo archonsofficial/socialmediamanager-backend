@@ -62,7 +62,7 @@ export const instaCallback = async (req: Request, res: Response) => {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-      }
+      },
     );
     const { access_token, user_id } = tokenResponse.data;
     // console.log("token response is -", tokenResponse);
@@ -99,63 +99,201 @@ export const instaCallback = async (req: Request, res: Response) => {
 };
 
 // Step 3: Create a post on Instagram
+// export const createPost = async (req: Request, res: Response) => {
+// const { accessToken, imageUrl, caption } = req.body;
+
+// if (!accessToken || !caption) {
+//   res.status(400).json({ error: "Missing required fields" });
+//   return;
+// }
+// console.log("Create post controller hit");
+
+// try {
+//   // Step 3.1: Get Instagram user ID
+//   const userResponse = await axios.get(`https://graph.instagram.com/v22/`, {
+//     params: { access_token: accessToken },
+//   });
+//   console.log("userResponse = ", userResponse);
+
+//   const instagramAccountId = userResponse.data.data[0]?.id;
+//   console.log("instagramAccountId = ", instagramAccountId);
+
+//   if (!instagramAccountId) {
+//     res.status(400).json({ error: "Instagram account not found" });
+//     return;
+//   }
+
+//   // Step 3.2: Create a media object
+//   const mediaResponse = await axios.post(
+//     `https://graph.facebook.com/v19.0/${instagramAccountId}/media`,
+//     null,
+//     {
+//       params: {
+//         image_url: imageUrl,
+//         caption,
+//         access_token: accessToken,
+//       },
+//     },
+//   );
+
+//   const mediaId = mediaResponse.data.id;
+
+//   // Step 3.3: Publish the media object
+//   const publishResponse = await axios.post(
+//     `https://graph.facebook.com/v19.0/${instagramAccountId}/media_publish`,
+//     null,
+//     {
+//       params: {
+//         creation_id: mediaId,
+//         access_token: accessToken,
+//       },
+//     },
+//   );
+
+//   res.json({ success: true, postId: publishResponse.data.id });
+//   return;
+// } catch (error) {
+//   res.status(500).json({ error: "Failed to create Instagram post" });
+// }
+// // };
 export const createPost = async (req: Request, res: Response) => {
   const { accessToken, imageUrl, caption } = req.body;
 
   if (!accessToken || !imageUrl || !caption) {
-    res.status(400).json({ error: "Missing required fields" });
+    res.status(400).json({
+      error:
+        "Missing required fields: accessToken, imageUrl, and caption are required",
+    });
     return;
   }
+
   console.log("Create post controller hit");
 
   try {
-    // Step 3.1: Get Instagram user ID
-    const userResponse = await axios.get(
-      `https://graph.facebook.com/v19.0/me/accounts`,
-      {
-        params: { access_token: accessToken },
-      }
-    );
-    console.log("userResponse = ", userResponse);
+    // Step 1: Get Instagram user info
+    const userResponse = await axios.get(`https://graph.instagram.com/me`, {
+      params: {
+        access_token: accessToken,
+        fields: "id,username,account_type",
+      },
+    });
 
-    const instagramAccountId = userResponse.data.data[0]?.id;
-    console.log("instagramAccountId = ", instagramAccountId);
+    console.log("User response:", userResponse.data);
+    const instagramUserId = userResponse.data.id;
+    const accountType = userResponse.data.account_type;
 
-    if (!instagramAccountId) {
-      res.status(400).json({ error: "Instagram account not found" });
+    if (!instagramUserId) {
+      res.status(400).json({ error: "Instagram user ID not found" });
       return;
     }
 
-    // Step 3.2: Create a media object
+    if (accountType !== "BUSINESS" && accountType !== "CREATOR") {
+      res.status(400).json({
+        error:
+          "Instagram account must be Business or Creator type to publish content",
+      });
+      return;
+    }
+
+    // Step 2: Create a container (media object)
     const mediaResponse = await axios.post(
-      `https://graph.facebook.com/v19.0/${instagramAccountId}/media`,
+      `https://graph.instagram.com/${instagramUserId}/media`,
       null,
       {
         params: {
           image_url: imageUrl,
-          caption,
+          caption: caption,
           access_token: accessToken,
         },
-      }
+      },
     );
 
-    const mediaId = mediaResponse.data.id;
+    console.log("Media response:", mediaResponse.data);
+    const containerId = mediaResponse.data.id;
 
-    // Step 3.3: Publish the media object
+    if (!containerId) {
+      res.status(400).json({
+        error: "Failed to create media container",
+        details: mediaResponse.data,
+      });
+      return;
+    }
+
+    // Step 3: Check container status before publishing
+    let containerStatus;
+    let statusCheckAttempts = 0;
+    const maxStatusCheckAttempts = 10;
+
+    do {
+      const statusResponse = await axios.get(
+        `https://graph.instagram.com/${containerId}`,
+        {
+          params: {
+            fields: "status_code",
+            access_token: accessToken,
+          },
+        },
+      );
+
+      containerStatus = statusResponse.data.status_code;
+      console.log(
+        `Container status (attempt ${statusCheckAttempts + 1}):`,
+        containerStatus,
+      );
+
+      if (containerStatus === "FINISHED") {
+        break;
+      } else if (containerStatus === "ERROR") {
+        res.status(400).json({
+          error: "Error creating media container",
+          details: statusResponse.data,
+        });
+        return;
+      }
+
+      statusCheckAttempts++;
+      // Wait for 2 seconds before checking again
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    } while (statusCheckAttempts < maxStatusCheckAttempts);
+
+    if (containerStatus !== "FINISHED") {
+      res.status(400).json({
+        error: "Media container processing timed out",
+        status: containerStatus,
+      });
+      return;
+    }
+
+    // Step 4: Publish the container
     const publishResponse = await axios.post(
-      `https://graph.facebook.com/v19.0/${instagramAccountId}/media_publish`,
+      `https://graph.instagram.com/${instagramUserId}/media_publish`,
       null,
       {
         params: {
-          creation_id: mediaId,
+          creation_id: containerId,
           access_token: accessToken,
         },
-      }
+      },
     );
 
-    res.json({ success: true, postId: publishResponse.data.id });
+    console.log("Publish response:", publishResponse.data);
+
+    // Step 5: Return success response with the Instagram post ID
+    res.json({
+      success: true,
+      message: "Instagram post created successfully",
+      postId: publishResponse.data.id,
+    });
     return;
-  } catch (error) {
-    res.status(500).json({ error: "Failed to create Instagram post" });
+  } catch (error: any) {
+    console.error(
+      "Error creating Instagram post:",
+      error.response?.data || error.message,
+    );
+    res.status(500).json({
+      error: "Failed to create Instagram post",
+      details: error.response?.data || error.message,
+    });
+    return;
   }
 };
