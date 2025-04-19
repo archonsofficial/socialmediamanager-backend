@@ -20,6 +20,7 @@
     "@types/passport": "^1.0.17",
     "axios": "^1.8.4",
     "bcrypt": "^5.1.1",
+    "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "http-status-codes": "^2.3.0",
