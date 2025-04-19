@@ -18,21 +18,7 @@ export const instaAuth = async (req: Request, res: Response) => {
       instaPref,
     },
   });
-export const instaAuth = async (req: Request, res: Response) => {
-  const {
-    user: { userId },
-    instaPref,
-  } = req as any;
-  await prisma.user.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      instaPref,
-    },
-  });
   const scope = "instagram_business_basic,instagram_business_content_publish";
-  const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURI(redirectUri)}&scope=${scope}&response_type=code`;
   const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURI(
     redirectUri
   )}&scope=${scope}&response_type=code`;
@@ -85,8 +71,6 @@ export const instaCallback = async (req: Request, res: Response) => {
     });
 
     res.json({
-      message: "Instagram authorization successfull",
-      long_access_token,
       message: "Instagram authorization successful",
       long_access_token,
       access_token,
@@ -640,4 +624,4 @@ export const createPost = async (req: Request, res: Response) => {
     });
     return;
   }
-};
+}
