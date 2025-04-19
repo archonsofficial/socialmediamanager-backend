@@ -35,7 +35,7 @@ export const instaCallback = async (req: Request, res: Response) => {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-      },
+      }
     );
     const { access_token, user_id } = tokenResponse.data;
     // console.log("token response is -", tokenResponse);
@@ -66,7 +66,7 @@ export const createPost = async (req: Request, res: Response) => {
       `https://graph.facebook.com/v19.0/me/accounts`,
       {
         params: { access_token: accessToken },
-      },
+      }
     );
 
     const instagramAccountId = userResponse.data.data[0]?.id;
@@ -86,7 +86,7 @@ export const createPost = async (req: Request, res: Response) => {
           caption,
           access_token: accessToken,
         },
-      },
+      }
     );
 
     const mediaId = mediaResponse.data.id;
@@ -100,7 +100,7 @@ export const createPost = async (req: Request, res: Response) => {
           creation_id: mediaId,
           access_token: accessToken,
         },
-      },
+      }
     );
 
     res.json({ success: true, postId: publishResponse.data.id });
