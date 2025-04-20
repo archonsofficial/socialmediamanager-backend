@@ -13,6 +13,7 @@ model User {
   email            String   @unique
   password         String
   instaAccessToken String   @unique
+  instaPostId      String[] @unique
   instaUserId      String   @unique
   instaPref        String[]
   xAccessToken     String   @unique

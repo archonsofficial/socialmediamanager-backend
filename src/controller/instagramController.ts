@@ -2,6 +2,7 @@ import axios from "axios";
 import { Request, Response } from "express";
 import qs from "qs";
 import { stringify } from "querystring";
+import prisma from "../db/connect";
 const appId = "657576830393437"; // Replace with your Instagram App ID
 const appSecret = "152e8a450437f2af661073cf1233a978"; // Replace with your Instagram App Secret
 const redirectUri = "https://api.prism2025.tech/instagram/auth/callback"; // Replace with your redirect URI
@@ -200,6 +201,16 @@ const instagramAccountId = userResponse.data.id;
     );
 
     console.log("Publish response:", publishResponse.data);
+    const newPostId = publishResponse.data.id
+    const {user:{userId}} = req as any;
+    await prisma.user.update({
+      where: {
+        id: userId
+      }, 
+      data: {
+        instaPostId: newPostId
+      }
+    })
 
     // Step 5: Return success response with the Instagram post ID
     res.json({
