@@ -10,21 +10,27 @@ const redirectUri = "https://api.prism2025.tech/instagram/auth/callback"; // Rep
 export const instaAuth = async (req: Request, res: Response) => {
   const {
     user: { userId },
-    instaPref,
+    query
   } = req as any;
-  await prisma.user.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      instaPref,
-    },
-  });
-  const scope = "instagram_business_basic,instagram_business_content_publish";
-  const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURI(
-    redirectUri
-  )}&scope=${scope}&response_type=code`;
-  res.redirect(authUrl);
+  const instaPref = Array.isArray(query.instaPref) ? query.instaPerf : [query.instaPerf];
+  try {
+    await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        instaPref,
+      },
+    });
+    const scope = "instagram_business_basic,instagram_business_content_publish";
+    const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURI(
+      redirectUri
+    )}&scope=${scope}&response_type=code`;
+    res.redirect(authUrl);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({error:"Internal server error during Instagram auth"});
+  }
 };
 // Step 2: Handle OAuth callback and exchange code for access token
 export const instaCallback = async (req: Request, res: Response) => {
@@ -51,7 +57,7 @@ export const instaCallback = async (req: Request, res: Response) => {
     // console.log("token response is -", tokenResponse);
     // const accessToken = tokenResponse.data.access_token;
     const longtoken = await axios.get(
-      "https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${appSecret}&access_token=${access_token}"
+      `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${appSecret}&access_token=${access_token}`
     );
     const long_access_token = longtoken.data.access_token;
 
@@ -232,3 +238,60 @@ const instagramAccountId = userResponse.data.id;
     return;
   }
 }
+
+export const getPostInsights = async (req: Request, res: Response) => {
+  // const { user: { userId } } = req as any;
+  // const user = await prisma.user.findUnique({ where: { id: userId } });
+  // const accessToken = user?.instaAccessToken;
+  // const postId = user?.instaPostId; 
+  const {postId, accessToken} = req.body
+  if (!postId || !accessToken) {
+    res.status(400).json({ error: "Missing postId or accessToken" });
+    return
+  }
+
+  // Common metrics: engagement, impressions, reach, saved, video_views (if video)
+  const metrics = "impressions, likes, shares, comments, replies, total_interactions, profile_visits, reach"; // Add/remove metrics as needed
+
+  try {
+    console.log(`Fetching insights for post ID: ${postId}`);
+
+    const insightsResponse = await axios.get(
+      `https://graph.instagram.com/v22.0/${postId}/insights`,
+      {
+        params: {
+          metric: metrics,
+          access_token: accessToken,
+        },
+      }
+    );
+
+    console.log("Insights response:", insightsResponse.data);
+
+    const insightsData = insightsResponse.data.data;
+
+    // Optional: Format the data for easier consumption on the frontend
+    const formattedInsights = insightsData.reduce((acc: any, insight: any) => {
+      acc[insight.name] = insight.values[0].value;
+      return acc;
+    }, {});
+
+
+    res.json({
+      success: true,
+      message: "Post insights retrieved successfully",
+      postId: postId,
+      insights: formattedInsights, 
+    });
+  } catch (error: any) {
+    console.error(
+      "Error fetching Instagram post insights:",
+      error.response?.data || error.message
+    );
+    res.status(error.response?.status || 500).json({
+      error: "Failed to fetch Instagram post insights",
+      details: error.response?.data || { message: error.message },
+    });
+  }
+};
+
